@@ -1,28 +1,21 @@
-import express, { Application, Request, Response } from "express"
-import market from "./database"
-import { IProduct, TProductRequest } from "./interfaces"
+import express, { Application } from "express"
+import {
+  createProducts,
+  deleteProductById,
+  getProducts,
+  getProductsById,
+  updateChocolate,
+} from "./logics"
+import { findIndexMiddleware, totalMiddleware } from "./middlewares"
 
 const app: Application = express()
 app.use(express.json())
 
-app.post("/products", (req: Request, res: Response): Response => {
-  const productData: TProductRequest = req.body
-  const productsToAdd = productData.map((product) => {
-    const newProduct: IProduct = {
-      id: market.length + 1,
-      ...product,
-      expirationDate: new Date(),
-    }
-    market.push(newProduct)
-    return newProduct
-  })
-
-  return res.status(201).json(productsToAdd)
-})
-
-app.get("/products", (req: Request, res: Response): Response => {
-  return res.status(200).json(market)
-})
+app.post("/products", createProducts)
+app.get("/products", getProducts)
+app.get("/products/:id", findIndexMiddleware, getProductsById)
+app.patch("/products/:id", findIndexMiddleware, updateChocolate)
+app.delete("/products/:id", findIndexMiddleware, deleteProductById)
 
 const PORT: number = 3000
 const runningMsg = `Server running on http://localhost:${PORT}`
